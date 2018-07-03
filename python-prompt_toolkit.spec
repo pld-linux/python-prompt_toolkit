@@ -13,7 +13,7 @@ Summary(pl.UTF-8):	Biblioteka do budowania interaktywnych linii komend w Pythoni
 # Name must match the python module/package name (as on pypi or in 'import' statement)
 Name:		python-%{module}
 Version:	1.0.14
-Release:	1
+Release:	2
 License:	BSD
 Group:		Libraries/Python
 Source0:	https://github.com/jonathanslenders/python-prompt-toolkit/archive/%{version}.tar.gz
