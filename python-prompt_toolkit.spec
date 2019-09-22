@@ -1,38 +1,47 @@
-# TODO:
-# - fix tests
-
+#
 # Conditional build:
-%bcond_without	doc	# don't build doc
-%bcond_with	tests	# do not perform "make test"
+%bcond_without	doc	# Sphinx documentation
+%bcond_without	tests	# unit tests
 %bcond_without	python2 # CPython 2.x module
 %bcond_without	python3 # CPython 3.x module
 
 %define 	module	prompt_toolkit
 Summary:	Library for building powerful interactive command lines in Python
-Summary(pl.UTF-8):	Biblioteka do budowania interaktywnych linii komend w Pythonie
-# Name must match the python module/package name (as on pypi or in 'import' statement)
+Summary(pl.UTF-8):	Biblioteka do budowania interaktywnych wierszy poleceń w Pythonie
 Name:		python-%{module}
-Version:	1.0.14
-Release:	2
+Version:	1.0.16
+Release:	1
 License:	BSD
 Group:		Libraries/Python
-Source0:	https://github.com/jonathanslenders/python-prompt-toolkit/archive/%{version}.tar.gz
-# Source0-md5:	c1592b4d29936a11bb864b334d8a3498
+#Source0Download: https://github.com/prompt-toolkit/python-prompt-toolkit/releases
+Source0:	https://github.com/jonathanslenders/python-prompt-toolkit/archive/%{version}/python-prompt-toolkit-%{version}.tar.gz
+# Source0-md5:	3a2f73737a0da19b60832c1d420d4311
 URL:		https://github.com/jonathanslenders/python-prompt-toolkit
-BuildRequires:	rpm-pythonprov
-# for the py_build, py_install macros
-BuildRequires:	rpmbuild(macros) >= 1.714
 %if %{with python2}
-BuildRequires:	python-modules
+BuildRequires:	python-modules >= 1:2.6
 BuildRequires:	python-setuptools
+BuildRequires:	python-six >= 1.9.0
+BuildRequires:	python-wcwidth
+%if %{with tests}
+BuildRequires:	python-pytest
+%endif
 %endif
 %if %{with python3}
-BuildRequires:	python3-modules
+BuildRequires:	python3-modules >= 1:3.3
 BuildRequires:	python3-setuptools
+BuildRequires:	python3-six >= 1.9.0
+BuildRequires:	python3-wcwidth
+%if %{with tests}
+BuildRequires:	python3-pytest
 %endif
-Requires:	python-modules
-Requires:	python-wcwidth
-
+%endif
+BuildRequires:	rpm-pythonprov
+BuildRequires:	rpmbuild(macros) >= 1.714
+BuildRequires:	sed >= 4.0
+%if %{with doc}
+BuildRequires:	sphinx-pdg
+%endif
+Requires:	python-modules >= 1:2.6
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -40,50 +49,61 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 prompt_toolkit is a library for building powerful interactive command
 lines and terminal applications in Python.
 
-# %%description -l pl.UTF-8
+%description -l pl.UTF-8
+prompt_toolkit to biblioteka do tworzenia interaktywnych wierwszy
+poleceń i aplikacji terminalowych w Pythonie.
 
 %package -n python3-%{module}
-Summary:	-
-Summary(pl.UTF-8):	-
+Summary:	Library for building powerful interactive command lines in Python
+Summary(pl.UTF-8):	Biblioteka do budowania interaktywnych wierszy poleceń w Pythonie
 Group:		Libraries/Python
-Requires:	python3-modules
-Requires:	python3-wcwidth
+Requires:	python3-modules >= 1:3.3
 
 %description -n python3-%{module}
 prompt_toolkit is a library for building powerful interactive command
 lines and terminal applications in Python.
 
-# %%description -n python3-%{module} -l pl.UTF-8
+%description -n python3-%{module} -l pl.UTF-8
+prompt_toolkit to biblioteka do tworzenia interaktywnych wierwszy
+poleceń i aplikacji terminalowych w Pythonie.
 
 %package apidocs
-Summary:	%{module} API documentation
-Summary(pl.UTF-8):	Dokumentacja API %{module}
+Summary:	API documentation for prompt_toolkit module
+Summary(pl.UTF-8):	Dokumentacja API modułu prompt_toolkit
 Group:		Documentation
 
 %description apidocs
-API documentation for %{module}.
+API documentation for prompt_toolkit module.
 
 %description apidocs -l pl.UTF-8
-Dokumentacja API %{module}.
+Dokumentacja API modułu prompt_toolkit.
 
 %prep
 %setup -q -n python-prompt-toolkit-%{version}
 
-#%{__sed} -i -e '1s,^#!.*python,#!%{__python},' %{name}.py
-
 %build
 %if %{with python2}
-%py_build %{?with_tests:test}
+%py_build
+
+%if %{with tests}
+# tests expect 
+TERM=xterm \
+%{__python} -m pytest tests
+%endif
 %endif
 
 %if %{with python3}
-%py3_build %{?with_tests:test}
+%py3_build
+
+%if %{with tests}
+# test_print_tokens expects sequences emitted for xterm
+TERM=xterm \
+%{__python3} -m pytest tests
+%endif
 %endif
 
 %if %{with doc}
-cd docs
-%{__make} -j1 html
-rm -rf _build/html/_sources
+%{__make} -C docs html
 %endif
 
 %install
@@ -91,9 +111,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{with python2}
 %py_install
-
-%py_ocomp $RPM_BUILD_ROOT%{py_sitedir}
-%py_comp $RPM_BUILD_ROOT%{py_sitedir}
 
 %py_postclean
 %endif
@@ -104,15 +121,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{with python2}
 install -d $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
-cp -a examples/* $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
+cp -pr examples/* $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
 find $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version} -name '*.py' \
-	| xargs sed -i '1s|^#!.*python\b|#!%{__python}|'
+	| xargs sed -i '1s|/usr/bin/env python|%{__python}|'
 %endif
 %if %{with python3}
 install -d $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version}
-cp -a examples/* $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version}
+cp -pr examples/* $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version}
 find $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version} -name '*.py' \
-	| xargs sed -i '1s|^#!.*python\b|#!%{__python3}|'
+	| xargs sed -i '1s|/usr/bin/env python|%{__python3}|'
 %endif
 
 %clean
@@ -121,23 +138,23 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with python2}
 %files
 %defattr(644,root,root,755)
-%doc README.rst CHANGELOG AUTHORS.rst
-%{py_sitescriptdir}/%{module}
-%{py_sitescriptdir}/%{module}-%{version}-py*.egg-info
+%doc AUTHORS.rst CHANGELOG LICENSE README.rst
+%{py_sitescriptdir}/prompt_toolkit
+%{py_sitescriptdir}/prompt_toolkit-%{version}-py*.egg-info
 %{_examplesdir}/python-%{module}-%{version}
 %endif
 
 %if %{with python3}
 %files -n python3-%{module}
 %defattr(644,root,root,755)
-%doc README.rst CHANGELOG AUTHORS.rst
-%{py3_sitescriptdir}/%{module}
-%{py3_sitescriptdir}/%{module}-%{version}-py*.egg-info
+%doc AUTHORS.rst CHANGELOG LICENSE README.rst
+%{py3_sitescriptdir}/prompt_toolkit
+%{py3_sitescriptdir}/prompt_toolkit-%{version}-py*.egg-info
 %{_examplesdir}/python3-%{module}-%{version}
 %endif
 
 %if %{with doc}
 %files apidocs
 %defattr(644,root,root,755)
-%doc docs/_build/html/*
+%doc docs/_build/html/{_images,_static,pages,*.html,*.js}
 %endif
