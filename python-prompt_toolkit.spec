@@ -1,3 +1,4 @@
+# NOTE: for versions >= 3.0 (for python 3.6.1+) see python3-prompt_toolkit.spec
 #
 # Conditional build:
 %bcond_without	doc	# Sphinx documentation
