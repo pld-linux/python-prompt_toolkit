@@ -9,13 +9,14 @@
 Summary:	Library for building powerful interactive command lines in Python
 Summary(pl.UTF-8):	Biblioteka do budowania interaktywnych wierszy poleceń w Pythonie
 Name:		python-%{module}
-Version:	1.0.16
-Release:	2
+# keep 1.x here (2.x is not supported by ipython for python2, 3.x drops python2 support)
+Version:	1.0.18
+Release:	1
 License:	BSD
 Group:		Libraries/Python
 #Source0Download: https://github.com/prompt-toolkit/python-prompt-toolkit/releases
 Source0:	https://github.com/jonathanslenders/python-prompt-toolkit/archive/%{version}/python-prompt-toolkit-%{version}.tar.gz
-# Source0-md5:	3a2f73737a0da19b60832c1d420d4311
+# Source0-md5:	1b800e5f190572d7a13bda45b7de058a
 URL:		https://github.com/jonathanslenders/python-prompt-toolkit
 %if %{with python2}
 BuildRequires:	python-modules >= 1:2.6
