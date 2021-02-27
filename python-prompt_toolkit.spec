@@ -12,7 +12,7 @@ Summary(pl.UTF-8):	Biblioteka do budowania interaktywnych wierszy poleceń w Pyt
 Name:		python-%{module}
 # keep 1.x here (2.x is not supported by ipython for python2, 3.x drops python2 support)
 Version:	1.0.18
-Release:	1
+Release:	2
 License:	BSD
 Group:		Libraries/Python
 #Source0Download: https://github.com/prompt-toolkit/python-prompt-toolkit/releases
