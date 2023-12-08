@@ -16,9 +16,9 @@ Release:	3
 License:	BSD
 Group:		Libraries/Python
 #Source0Download: https://github.com/prompt-toolkit/python-prompt-toolkit/releases
-Source0:	https://github.com/jonathanslenders/python-prompt-toolkit/archive/%{version}/python-prompt-toolkit-%{version}.tar.gz
+Source0:	https://github.com/prompt-toolkit/python-prompt-toolkit/archive/%{version}/python-prompt-toolkit-%{version}.tar.gz
 # Source0-md5:	1b800e5f190572d7a13bda45b7de058a
-URL:		https://github.com/jonathanslenders/python-prompt-toolkit
+URL:		https://github.com/prompt-toolkit/python-prompt-toolkit
 %if %{with python2}
 BuildRequires:	python-modules >= 1:2.6
 BuildRequires:	python-setuptools
@@ -88,7 +88,8 @@ Dokumentacja API modułu prompt_toolkit.
 %py_build
 
 %if %{with tests}
-# tests expect 
+# test_print_tokens expects sequences emitted for xterm
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
 TERM=xterm \
 %{__python} -m pytest tests
 %endif
@@ -99,6 +100,7 @@ TERM=xterm \
 
 %if %{with tests}
 # test_print_tokens expects sequences emitted for xterm
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
 TERM=xterm \
 %{__python3} -m pytest tests
 %endif
